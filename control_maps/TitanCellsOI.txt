@@ -1,0 +1,42 @@
+Name= TitanCellsOI
+Robot= Titan
+
+Driver=
+A:
+B: Vision
+X:
+Y:
+D_UP:
+D_DOWN:
+D_LEFT:
+D_RIGHT:
+RT:
+LT:
+RB: Hood Extensions
+LB: Hood
+START:
+BACK:
+LS:
+RS:
+LSB:
+RSB:
+
+Operator=
+A: Toggle Intake
+B: Shoot
+X: Intake
+Y:
+D_UP:
+D_DOWN: Shooting Wheel
+D_LEFT:
+D_RIGHT:
+RT: Move Turret
+LT: Move Turret
+RB:
+LB:
+START:
+BACK:
+LS:
+RS:
+LSB:
+RSB:

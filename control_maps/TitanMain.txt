@@ -1,0 +1,42 @@
+Name= TitanMain
+Robot= Titan
+
+Driver=
+A: Brake
+B:
+X:
+Y:
+D_UP:
+D_DOWN:
+D_LEFT:
+D_RIGHT:
+RT: Lock Axis
+LT: Low Gear
+RB: Collect
+LB: Toggle Drive Mode
+START:
+BACK:
+LS:
+RS:
+LSB:
+RSB:
+
+Operator=
+A: Eject
+B: Shoot
+X: By Rotation
+Y: By Color
+D_UP: Auto Aim
+D_DOWN: Outer Target
+D_LEFT:
+D_RIGHT:
+RT: Prepare Shoot / Ride Right
+LT: Prepare Shoot Const/ Ride Left
+RB:
+LB: Defense Mode
+START: Climb Mode
+BACK: Toggle Spinner
+LS: Move Turret / Climb
+RS:
+LSB: Toggle Manual
+RSB:
