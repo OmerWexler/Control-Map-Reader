@@ -2,7 +2,10 @@ import cv2
 import numpy as np
 import os
 import shutil
+import configparser
 
+DEFAULT_CONFIG_PATH = os.path.join(os.getcwd(), 'config.ini')
+OVERRIDE_CONFIG_PATH = r"E:\Desktop\workspace\software\java operation parser\Control-Map-Reader\config.ini"
 
 btn_locations = {
     'A': (910, 355),
@@ -26,23 +29,19 @@ btn_locations = {
 }
 
 
-def get_images():
-    XBOX_FRONT = {'name': "xbx_front.jpg", 'res': (1350, 759)}
-    XBOX_TOP = {'name': "xbx_top.jpg", 'res': (1350, 759)}
-    PATH = os.path.join(os.getcwd(), 'resources')
-
-    img1 = cv2.imread(os.path.join(PATH, XBOX_FRONT.get('name')), 0)
-    img2 = cv2.imread(os.path.join(PATH, XBOX_TOP.get('name')), 0)
+def get_images(front_path, top_path):
+    img1 = cv2.imread(front_path, 0)
+    img2 = cv2.imread(top_path, 0)
     combined = np.concatenate((img1, img2), axis=1)
 
     return combined
 
 
-def put_text(image, text: list, controller: str):
+def put_text(location_map: dict, image, label_map, controller: str):
     i = image
     cv2.putText(i, controller.capitalize(), (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 255), 3, cv2.LINE_AA)
-    for val in text:
-        cv2.putText(i, val[1], btn_locations.get(val[0]), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 2, cv2.LINE_AA)
+    for key in label_map:
+        cv2.putText(i, label_map[key], location_map[key], cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 2, cv2.LINE_AA)
 
     return i
 
@@ -68,7 +67,7 @@ def save(image: tuple, robot, name):
     cv2.imwrite(os.path.join(d, 'operator' + '.jpg'), image[1])
 
 
-def read_from_file(name: str):
+def read_map(name: str):
     PATH = os.path.join(os.getcwd(), 'control_maps', name + ".txt")
 
     driver = []
@@ -103,23 +102,54 @@ def read_from_file(name: str):
     return robot, name, driver, operator
 
 
+def parse_config(config_path):
+    if not os.path.exists(config_path):
+        return None
+    
+    config = configparser.ConfigParser()
+    config.read(config_path)
+    return config
+
+
+def find_path(path):
+    if os.path.exists(path):
+        return path
+    
+    if os.path.exists(os.path.join(os.getcwd(), path)):
+        return path
+
+    return None
+
+
+def parse_label_map(config):
+    label_map = {}
+    for key in config[type]:
+        label_map[key] = config[type][key]
+
+
 if __name__ == '__main__':
-    NAME = "TitanMain"
+    if OVERRIDE_CONFIG_PATH != None:
+        config = parse_config(find_path(OVERRIDE_CONFIG_PATH))
+    else:
+        config = parse_config(find_path(DEFAULT_CONFIG_PATH))
 
     debug = False
-    for f in os.listdir(os.path.join(os.getcwd(), 'control_maps')):
-        if f.endswith('.txt'):
-            f_robot, f_name, f_driver, f_operator = read_from_file(f.replace('.txt', ''))
+    for map in config['sources']['maps'].split(','):
+        p_map = parse_config(map)
+        
+        controller_front = find_path(config['sources']['controller_front'])
+        controller_top = find_path(config['sources']['controller_top'])
 
-            res_image_d = get_images()
-            res_image_o = get_images()
-            res_image_d = put_text(res_image_d, f_driver, 'driver')
-            res_image_o = put_text(res_image_o, f_operator, 'operator')
+        res_image_d = get_images(controller_front, controller_top)
+        res_image_o = get_images(controller_front, controller_top)
 
-            if debug:
-                disp(res_image_o)
-                disp(res_image_d)
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
-            else:
-                save((res_image_d, res_image_o), f_robot, f_name)
+        res_image_d = put_text(config['buttons'], res_image_d, p_map['driver'], 'driver')
+        res_image_o = put_text(config['buttons'], res_image_o, p_map['operator'], 'operator')
+
+        if debug:
+            disp(res_image_o)
+            disp(res_image_d)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+        else:
+            save((res_image_d, res_image_o), p_map['general']['robot'], p_map['general']['name'])
